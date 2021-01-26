@@ -95,6 +95,7 @@ resource "aws_launch_configuration" "launch_configuration" {
     volume_type           = var.root_volume_type
     volume_size           = var.root_volume_size
     delete_on_termination = var.root_volume_delete_on_termination
+    encrypted             = var.root_volume_encrypted
   }
 
   # Important note: whenever using a launch configuration with an auto scaling group, you must set
@@ -182,7 +183,10 @@ module "security_group_rules" {
   serf_lan_port   = var.serf_lan_port
   serf_wan_port   = var.serf_wan_port
   http_api_port   = var.http_api_port
+  https_api_port  = var.https_api_port
   dns_port        = var.dns_port
+
+  enable_https_port = var.enable_https_port
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -211,6 +215,8 @@ resource "aws_iam_role" "instance_role" {
 
   name_prefix        = var.cluster_name
   assume_role_policy = data.aws_iam_policy_document.instance_role.json
+
+  permissions_boundary = var.iam_permissions_boundary
 
   # aws_iam_instance_profile.instance_profile in this module sets create_before_destroy to true, which means
   # everything it depends on, including this resource, must set it as well, or you'll get cyclic dependency errors
